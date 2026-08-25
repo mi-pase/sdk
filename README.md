@@ -1,21 +1,64 @@
-# mi-pase SDKs
+<p align="center">
+  <img src="./assets/logo.svg" height="60px" alt="Mi Pase" />
+</p>
 
-Official SDKs for the [mi-pase](https://mi-pase.ar) API. This is a monorepo — one directory per language, all published from the same repo.
+<h1 align="center">Mi Pase SDKs</h1>
 
-| Package | Language | Path | Registry |
-| --- | --- | --- | --- |
-| [`@mi-pase/sdk`](packages/node) | Node.js / TypeScript | `packages/node` | GitHub Packages (`@mi-pase` scope) |
+<p align="center">Official SDKs for the <a href="https://mi-pase.ar">Mi Pase</a> API — manage projects, enrollments, rewards, pass templates, and validators from your own backend.</p>
 
-More languages will get their own `packages/<language>` directory as they're added — see [CLAUDE.md](CLAUDE.md) for the conventions a new package should follow.
+## Available SDKs
 
-For usage docs, install instructions, and the full API reference, see the [Node SDK's README](packages/node/README.md).
+| Language | Package | Docs |
+| --- | --- | --- |
+| Node.js / TypeScript | [`@mi-pase/sdk`](packages/node) | [Usage guide](packages/node/README.md) |
 
-## Development
+More languages are on the way.
+
+## Quick start (Node.js)
 
 ```bash
-npm install                 # installs all workspaces
-npm run build                # builds all packages
-npm test                     # unit tests for all packages (no credentials required)
+npm install @mi-pase/sdk
+```
+
+> `@mi-pase/sdk` is published to GitHub Packages rather than the public npm registry — see the [Node SDK docs](packages/node/README.md#installation) for the one-time `.npmrc` setup this requires.
+
+```ts
+import { MiPaseClient } from "@mi-pase/sdk";
+
+const client = new MiPaseClient({
+  // A Clerk Organization API key from your Mi Pase organization's settings.
+  apiKey: process.env.MI_PASE_API_KEY!,
+});
+
+const project = await client.projects.create({
+  domain: "acme",
+  name: "Summer Fest 2026",
+});
+
+await client
+  .project(project._id)
+  .enrollments.create({ domain: "acme", name: "Jane Doe", email: "jane@example.com" });
+```
+
+See the [Node SDK README](packages/node/README.md) for the full API reference — projects, enrollments, rewards, templates, validators, and error handling.
+
+## Support
+
+Questions or issues? Open an [issue](https://github.com/mi-pase/sdk/issues) on this repo.
+
+---
+
+## Contributing
+
+<details>
+<summary>Local development, testing, and releasing</summary>
+
+This is a monorepo — one directory per language SDK under `packages/`. See [CLAUDE.md](CLAUDE.md) for the conventions a new package should follow.
+
+```bash
+npm install                  # installs all workspaces
+npm run build                 # builds all packages
+npm test                      # unit tests for all packages (no credentials required)
 ```
 
 Scoped to one package:
@@ -27,7 +70,7 @@ npm test -w packages/node
 
 ### Integration tests
 
-`packages/node` also has a live integration suite that exercises every SDK method against a real mi-pase deployment. It's skipped automatically unless `MI_PASE_TEST_API_KEY` is set, so it never runs against real infrastructure by accident:
+`packages/node` also has a live integration suite that exercises every SDK method against a real Mi Pase deployment. It's skipped automatically unless `MI_PASE_TEST_API_KEY` is set, so it never runs against real infrastructure by accident:
 
 ```bash
 MI_PASE_TEST_API_KEY=... \
@@ -38,7 +81,7 @@ npm run test:integration -w packages/node
 
 The test org's API key must belong to the org whose slug is `MI_PASE_TEST_DOMAIN` — every create call in the suite asserts domain access using that org. In CI this runs from the `MI_PASE_TEST_API_KEY` GitHub Actions secret, gated in front of every publish (see below).
 
-## Releasing
+### Releasing
 
 Every push to `main` that passes CI:
 
@@ -49,3 +92,5 @@ Every push to `main` that passes CI:
 There's no manual version bump step — just merge to `main`. If you need a minor/major bump instead of a patch, bump `packages/node/package.json` yourself in your PR; the auto-bump only applies when the version wasn't already changed.
 
 See [`.github/workflows/publish.yml`](.github/workflows/publish.yml).
+
+</details>
