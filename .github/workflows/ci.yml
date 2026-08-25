@@ -1,0 +1,40 @@
+name: CI
+
+on:
+    pull_request:
+        branches: [main]
+    merge_group:
+    workflow_dispatch:
+    workflow_call:
+
+jobs:
+    node-sdk:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: read
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v5
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v5
+              with:
+                  node-version: "22"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Lint
+              run: npm run lint -w packages/node
+
+            - name: Typecheck
+              run: npm run typecheck -w packages/node
+
+            - name: Unit tests
+              run: npm test -w packages/node
+
+            - name: Build
+              run: npm run build -w packages/node

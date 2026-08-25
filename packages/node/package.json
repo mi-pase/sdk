@@ -1,0 +1,69 @@
+{
+	"name": "@mi-pase/sdk",
+	"version": "0.1.0",
+	"description": "Official Node.js / TypeScript SDK for the mi-pase API (projects, enrollments, rewards, templates, and validators).",
+	"license": "MIT",
+	"author": "mi-pase",
+	"homepage": "https://github.com/mi-pase/sdk/tree/main/packages/node#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/mi-pase/sdk.git",
+		"directory": "packages/node"
+	},
+	"bugs": "https://github.com/mi-pase/sdk/issues",
+	"keywords": [
+		"mi-pase",
+		"wallet",
+		"apple-wallet",
+		"google-wallet",
+		"sdk",
+		"api"
+	],
+	"type": "module",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"engines": {
+		"node": ">=18"
+	},
+	"publishConfig": {
+		"access": "restricted",
+		"registry": "https://npm.pkg.github.com"
+	},
+	"scripts": {
+		"build": "tsup",
+		"dev": "tsup --watch",
+		"typecheck": "tsc --noEmit",
+		"lint": "eslint src test",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:integration": "vitest run --config vitest.integration.config.ts",
+		"prepublishOnly": "npm run build"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.2",
+		"eslint": "^9.17.0",
+		"tsup": "^8.3.5",
+		"typescript": "^5.7.2",
+		"typescript-eslint": "^8.18.0",
+		"vitest": "^2.1.8"
+	}
+}

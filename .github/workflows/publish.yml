@@ -1,0 +1,91 @@
+name: Publish
+
+on:
+    push:
+        branches: ["main"]
+
+jobs:
+    ci:
+        uses: ./.github/workflows/ci.yml
+
+    integration:
+        needs: ci
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: read
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v5
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v5
+              with:
+                  node-version: "22"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Integration tests
+              run: npm run test:integration -w packages/node
+              env:
+                  MI_PASE_TEST_API_KEY: ${{ secrets.MI_PASE_TEST_API_KEY }}
+                  MI_PASE_TEST_DOMAIN: ${{ vars.MI_PASE_TEST_DOMAIN || 'ci-testing' }}
+                  MI_PASE_TEST_BASE_URL: ${{ vars.MI_PASE_TEST_BASE_URL }}
+
+    publish:
+        needs: integration
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            packages: write
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v5
+              with:
+                  # Default GITHUB_TOKEN so the version-bump commit below can push to main.
+                  persist-credentials: true
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v5
+              with:
+                  node-version: "22"
+                  cache: "npm"
+                  registry-url: "https://npm.pkg.github.com"
+                  scope: "@mi-pase"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Bump version if unchanged since last publish
+              id: version
+              working-directory: packages/node
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  PKG_NAME=$(node -p "require('./package.json').name")
+                  CURRENT_VERSION=$(node -p "require('./package.json').version")
+                  PUBLISHED_VERSION=$(npm view "$PKG_NAME" version --registry=https://npm.pkg.github.com 2>/dev/null || echo "")
+
+                  if [ "$CURRENT_VERSION" = "$PUBLISHED_VERSION" ]; then
+                    echo "Version $CURRENT_VERSION already published — bumping patch version."
+                    npm version patch --no-git-tag-version
+                    NEW_VERSION=$(node -p "require('./package.json').version")
+
+                    git config user.name "github-actions[bot]"
+                    git config user.email "github-actions[bot]@users.noreply.github.com"
+                    git add package.json
+                    git commit -m "chore(release): @mi-pase/sdk v$NEW_VERSION [skip ci]"
+                    git push origin HEAD:main
+                  else
+                    echo "Version already bumped to $CURRENT_VERSION (published: ${PUBLISHED_VERSION:-none}) — publishing as-is."
+                  fi
+
+            - name: Publish to GitHub Packages
+              working-directory: packages/node
+              run: npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
