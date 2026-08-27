@@ -20,8 +20,6 @@ More languages are on the way.
 npm install @mi-pase/sdk
 ```
 
-> `@mi-pase/sdk` is published to GitHub Packages rather than the public npm registry — see the [Node SDK docs](packages/node/README.md#installation) for the one-time `.npmrc` setup this requires.
-
 ```ts
 import { MiPaseClient } from "@mi-pase/sdk";
 

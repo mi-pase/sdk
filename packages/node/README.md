@@ -9,23 +9,28 @@ Official Node.js / TypeScript SDK for the [mi-pase](https://mi-pase.ar) API — 
 
 ## Installation
 
-This package is published to **GitHub Packages**, not the public npm registry. Add this to your project's `.npmrc`:
+```bash
+npm install @mi-pase/sdk
+```
+
+That's it — the package is published to the public npm registry, no authentication required.
+
+<details>
+<summary>Installing from GitHub Packages instead</summary>
+
+`@mi-pase/sdk` is also published to GitHub Packages on every release. To use that registry instead, add this to your project's `.npmrc`:
 
 ```
 @mi-pase:registry=https://npm.pkg.github.com/
 ```
 
-Then authenticate npm with a GitHub personal access token that has `read:packages` scope (ask your mi-pase contact if you don't have one), either via `npm login --scope=@mi-pase --registry=https://npm.pkg.github.com` or by adding to `.npmrc`:
+Then authenticate npm with a GitHub personal access token that has `read:packages` scope, either via `npm login --scope=@mi-pase --registry=https://npm.pkg.github.com` or by adding to `.npmrc`:
 
 ```
 //npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
 ```
 
-Then install as usual:
-
-```bash
-npm install @mi-pase/sdk
-```
+</details>
 
 ## Quick start
 

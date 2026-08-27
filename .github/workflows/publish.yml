@@ -41,6 +41,9 @@ jobs:
         permissions:
             contents: write
             packages: write
+            # Lets npm mint an OIDC token to authenticate the npmjs.com publish
+            # below via Trusted Publishing — no NPM_TOKEN secret to rotate.
+            id-token: write
 
         steps:
             - name: Checkout repository
@@ -59,6 +62,11 @@ jobs:
 
             - name: Install dependencies
               run: npm ci
+
+            # Trusted Publishing requires npm >= 11.5.1; the version bundled
+            # with actions/setup-node's Node 22 can lag behind that.
+            - name: Update npm
+              run: npm install -g npm@latest
 
             - name: Bump version if unchanged since last publish
               id: version
@@ -89,3 +97,15 @@ jobs:
               run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            # Public registry, authenticated via Trusted Publishing (OIDC) —
+            # the actions/setup-node step above points @mi-pase at GitHub
+            # Packages for the step above, so both the registry and the scope
+            # mapping must be overridden explicitly here.
+            - name: Publish to npm (public registry)
+              working-directory: packages/node
+              run: |
+                  npm publish \
+                    --registry=https://registry.npmjs.org \
+                    --@mi-pase:registry=https://registry.npmjs.org \
+                    --access public
