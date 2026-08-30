@@ -6,6 +6,7 @@ coverage/
 .env
 .env.*
 !.env.example
+packages/node/sandbox/
 .npmrc
 *.log
 npm-debug.log*
