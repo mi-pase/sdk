@@ -160,6 +160,60 @@ describe.skipIf(!apiKey)("integration: mi-pase API (live)", () => {
 		expect(deleted._id).toBe(enrollment._id);
 	});
 
+	it("array (list-type) custom fields: create, merge, override", async () => {
+		// kind="program" so it doesn't compete for the org's single active-project
+		// slot; array custom fields (`fieldType: "list"`) hold their value as a
+		// string[] on the enrollment.
+		const arrayProject = await client.projects.create({
+			domain,
+			name: `sdk-ci-arraycf-${runId}`,
+			kind: "program",
+			// Enrolling requires the project to have a pass design configured.
+			applePassDesign: {
+				backgroundColor: { type: "static", value: "#FFFFFF" },
+			},
+			customFieldDefs: [
+				{ key: "seat", label: "Seat" },
+				{ key: "tags", label: "Tags", fieldType: "list" },
+			],
+		});
+		cleanup.projectIds.push(arrayProject._id);
+
+		// The list-type def round-trips on the project itself.
+		expect(
+			arrayProject.customFieldDefs.find((d) => d.key === "tags")?.fieldType,
+		).toBe("list");
+
+		const created = await client
+			.project(arrayProject._id)
+			.enrollments.create({
+				domain,
+				name: "Array CF Person",
+				email: `sdk-ci-arraycf-${runId}@example.com`,
+				customFields: { seat: "1A", tags: ["vip", "press"] },
+			});
+		expect(created.customFields).toEqual({ seat: "1A", tags: ["vip", "press"] });
+
+		// Merge adds a new array key while the existing scalar + array survive.
+		const merged = await client
+			.project(arrayProject._id)
+			.enrollment(created._id)
+			.setCustomFields({ interests: ["music", "sports"] });
+		expect(merged.customFields).toMatchObject({
+			seat: "1A",
+			tags: ["vip", "press"],
+			interests: ["music", "sports"],
+		});
+
+		// Override replaces an array wholesale.
+		const replaced = await client
+			.enrollment(created._id)
+			.setCustomFields({ tags: ["staff"] }, { override: true });
+		expect(replaced.customFields).toEqual({ tags: ["staff"] });
+
+		await client.enrollment(created._id).delete();
+	});
+
 	it("bulk-enrolls and copies enrollments to a program", async () => {
 		const target = await client.projects.create({
 			domain,

@@ -5,8 +5,10 @@ export interface Enrollment extends Timestamps {
 	domain: string;
 	person: ObjectId;
 	project: ObjectId;
-	/** Values for the project's custom field definitions, keyed by field key. */
-	customFields: Record<string, string>;
+	/** Values for the project's custom field definitions, keyed by field key.
+	 *  A value is a string for `text`/`date` fields, or a `string[]` for
+	 *  `list` fields. */
+	customFields: Record<string, string | string[]>;
 	integrationInstance?: ObjectId;
 	externalId?: string;
 	deletedAt?: string;
@@ -21,13 +23,16 @@ export interface CreateEnrollmentInput {
 	/** Used to deduplicate persons within the domain. */
 	email?: string;
 	phone?: string;
-	customFields?: Record<string, string>;
+	/** Keyed by field key. A value is a string for `text`/`date` fields, or a
+	 *  `string[]` for `list` fields. */
+	customFields?: Record<string, string | string[]>;
 }
 
 export interface UpdateEnrollmentInput {
 	/** Full replacement of customFields — see `EnrollmentResource.setCustomFields`
-	 *  for a merge-friendly alternative. */
-	customFields?: Record<string, string>;
+	 *  for a merge-friendly alternative. A value is a string for `text`/`date`
+	 *  fields, or a `string[]` for `list` fields. */
+	customFields?: Record<string, string | string[]>;
 }
 
 export interface ListEnrollmentsParams {

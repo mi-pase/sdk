@@ -49,4 +49,47 @@ describe("EnrollmentResource.setCustomFields", () => {
 		expect(calls[0]!.method).toBe("PUT");
 		expect(calls[0]!.body).toEqual({ customFields: { seat: "12A" } });
 	});
+
+	it("sends array values for list-type fields on override", async () => {
+		const { enrollment, calls } = resource([
+			{
+				status: 200,
+				body: { _id: "enr_1", customFields: { tags: ["vip", "press"] } },
+			},
+		]);
+
+		const updated = await enrollment.setCustomFields(
+			{ tags: ["vip", "press"] },
+			{ override: true },
+		);
+
+		expect(calls[0]!.method).toBe("PUT");
+		expect(calls[0]!.body).toEqual({ customFields: { tags: ["vip", "press"] } });
+		expect(updated.customFields).toEqual({ tags: ["vip", "press"] });
+	});
+
+	it("merges array and scalar fields, preserving existing values of both kinds", async () => {
+		const { enrollment, calls } = resource([
+			{
+				status: 200,
+				body: {
+					_id: "enr_1",
+					customFields: { seat: "10A", tags: ["vip"] },
+				},
+			},
+			{ status: 200, body: { _id: "enr_1" } },
+		]);
+
+		await enrollment.setCustomFields({ interests: ["music", "sports"] });
+
+		expect(calls[0]!.method).toBe("GET");
+		expect(calls[1]!.method).toBe("PUT");
+		expect(calls[1]!.body).toEqual({
+			customFields: {
+				seat: "10A",
+				tags: ["vip"],
+				interests: ["music", "sports"],
+			},
+		});
+	});
 });

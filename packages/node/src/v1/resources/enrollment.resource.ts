@@ -36,12 +36,16 @@ export class EnrollmentResource {
 	/**
 	 * Set one or more custom field values.
 	 *
+	 * A value is a string for `text`/`date` fields, or a `string[]` for `list`
+	 * fields.
+	 *
 	 * @example
 	 * await client.project(projectId).enrollment(id).setCustomFields({ seat: "12A" });
 	 * await client.enrollment(id).setCustomFields({ seat: "12A" }, { override: true });
+	 * await client.enrollment(id).setCustomFields({ tags: ["vip", "press"] });
 	 */
 	async setCustomFields(
-		fields: Record<string, string>,
+		fields: Record<string, string | string[]>,
 		options: SetCustomFieldsOptions = {},
 	): Promise<Enrollment> {
 		if (options.override) {

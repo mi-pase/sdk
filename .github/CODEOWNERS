@@ -1,0 +1,20 @@
+# CODEOWNERS for mi-pase/sdk
+#
+# These owners are requested for review on every pull request that touches
+# matching files. To make review mandatory, enable "Require review from Code
+# Owners" in the branch/ruleset protection for `main`.
+#
+# Later matches take precedence over earlier ones.
+
+# Default owner for everything in the repo.
+*                       @bartolomeoadrian
+
+# Security policy and code ownership itself.
+/SECURITY.md            @bartolomeoadrian
+/.github/CODEOWNERS     @bartolomeoadrian
+
+# CI / release workflows — publishing to a package registry.
+/.github/workflows/     @bartolomeoadrian
+
+# Node SDK package.
+/packages/node/         @bartolomeoadrian

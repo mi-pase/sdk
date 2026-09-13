@@ -8,13 +8,16 @@ import type {
 
 export type ProjectKind = "project" | "program";
 export type ProjectStatus = "active" | "finalized";
-export type CustomFieldType = "text" | "date";
+export type CustomFieldType = "text" | "date" | "list";
 
 export interface CustomFieldDef {
 	/** Unique snake_case key, immutable after creation. Used as the token in
 	 *  pass designs and as the property key in `enrollment.customFields`. */
 	key: string;
 	label: string;
+	/** `text` — free-form string; `date` — ISO 8601 date string; `list` — a
+	 *  variable-length array of strings (stored as `string[]` on the enrollment,
+	 *  data-only, not bindable to a pass design slot). Immutable after creation. */
 	fieldType: CustomFieldType;
 	/** Pass cannot be issued until this field has a value. */
 	required: boolean;
