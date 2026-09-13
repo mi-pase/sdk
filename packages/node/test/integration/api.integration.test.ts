@@ -24,6 +24,40 @@ const baseUrl = process.env.MI_PASE_TEST_BASE_URL;
 const domain = process.env.MI_PASE_TEST_DOMAIN ?? "ci-testing";
 const runId = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
+/**
+ * Minimal-but-valid Apple + Google config for the passes microservice, used to
+ * sync a template so projects can actually issue passes. The microservice
+ * requires a non-empty `apple.images`, so an icon + logo are declared.
+ */
+function buildTemplateConfig() {
+	const logoUrl = `${baseUrl ?? "https://app.mi-pase.ar"}/logo.png`;
+	return {
+		apple: {
+			formatVersion: 1,
+			organizationName: "SDK CI",
+			description: "SDK CI generic template",
+			backgroundColor: "#1C1C1E",
+			foregroundColor: "#FFFFFF",
+			labelColor: "#AAAAAA",
+			generic: {
+				headerFields: [],
+				primaryFields: [],
+				secondaryFields: [],
+				auxiliaryFields: [],
+			},
+			images: { icon: logoUrl, logo: logoUrl },
+			barcodes: [
+				{
+					format: "PKBarcodeFormatQR",
+					message: "placeholder",
+					messageEncoding: "iso-8859-1",
+				},
+			],
+		},
+		google: { type: "generic", genericClass: {} },
+	};
+}
+
 describe.skipIf(!apiKey)("integration: mi-pase API (live)", () => {
 	// describe.skipIf still runs this body during collection even when the
 	// suite is skipped, so this must not throw — MiPaseClient requires a
@@ -38,11 +72,32 @@ describe.skipIf(!apiKey)("integration: mi-pase API (live)", () => {
 		templateIds: [],
 	};
 	let project: Project;
+	// A template synced to the passes microservice (has an external_template_id),
+	// shared across fixtures so their projects can issue passes on enroll.
+	let configuredTemplateId: string;
+
+	/** Creates a template and syncs its config so it gains an external_template_id. */
+	async function provisionConfiguredTemplate(label: string): Promise<string> {
+		const template = await client.templates.create({
+			domain,
+			name: `sdk-ci-tmpl-${label}-${runId}`,
+			type: "generic",
+		});
+		cleanup.templateIds.push(template._id);
+		await client.template(template._id).saveConfig(buildTemplateConfig());
+		return template._id;
+	}
 
 	beforeAll(async () => {
+		// On an org with an active passes provider, enrolling issues a pass, which
+		// requires the project to link a template that's been synced to the passes
+		// microservice. Provision one and share it across the fixtures below.
+		configuredTemplateId = await provisionConfiguredTemplate("shared");
+
 		project = await client.projects.create({
 			domain,
 			name: `sdk-ci-project-${runId}`,
+			template: configuredTemplateId,
 			// Enrolling requires the project to have a pass design configured.
 			applePassDesign: {
 				backgroundColor: { type: "static", value: "#FFFFFF" },
@@ -52,14 +107,18 @@ describe.skipIf(!apiKey)("integration: mi-pase API (live)", () => {
 	});
 
 	afterAll(async () => {
-		const results = await Promise.allSettled([
-			...cleanup.templateIds.map((id) => client.template(id).delete()),
-			...cleanup.projectIds.map(async (id) => {
+		// Projects must be finalized + deleted before their templates: deleting a
+		// template still referenced by an active project 409s.
+		const projectResults = await Promise.allSettled(
+			cleanup.projectIds.map(async (id) => {
 				await client.project(id).update({ status: "finalized" });
 				await client.project(id).delete();
 			}),
-		]);
-		for (const result of results) {
+		);
+		const templateResults = await Promise.allSettled(
+			cleanup.templateIds.map((id) => client.template(id).delete()),
+		);
+		for (const result of [...projectResults, ...templateResults]) {
 			if (result.status === "rejected") {
 				console.warn("Integration test cleanup failed:", result.reason);
 			}
@@ -168,6 +227,7 @@ describe.skipIf(!apiKey)("integration: mi-pase API (live)", () => {
 			domain,
 			name: `sdk-ci-arraycf-${runId}`,
 			kind: "program",
+			template: configuredTemplateId,
 			// Enrolling requires the project to have a pass design configured.
 			applePassDesign: {
 				backgroundColor: { type: "static", value: "#FFFFFF" },
