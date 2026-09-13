@@ -17,7 +17,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v5
+              uses: actions/checkout@v7
 
             - name: Set up Node.js
               uses: actions/setup-node@v5
@@ -47,7 +47,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v5
+              uses: actions/checkout@v7
               with:
                   # Default GITHUB_TOKEN so the version-bump commit below can push to main.
                   persist-credentials: true
