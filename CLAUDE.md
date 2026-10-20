@@ -4,12 +4,12 @@ Guidance for working in this repo — a monorepo of official mi-pase SDKs, one d
 
 ## What this is
 
-The mi-pase platform (backend: `mi-pase/diamond`, a NestJS app) exposes a public API surface behind Swagger at `/api-docs/public`, restricted to the modules customers actually call: **Projects, Enrollments, Rewards, Templates, Validators, Health**. Everything in `packages/*` is a thin, ergonomic client over that surface, authenticated with a **Clerk Organization API key** sent as `Authorization: Bearer <key>`.
+The mi-pase platform (backend: `mi-pase/diamond`, a NestJS app) exposes a public API surface behind Swagger at `/api-docs/public`, restricted to the modules customers actually call: **Projects, Enrollments, Rewards, Templates, Validators, Notifications, Health**. Everything in `packages/*` is a thin, ergonomic client over that surface, authenticated with a **Clerk Organization API key** sent as `Authorization: Bearer <key>`.
 
 If you need to check exact request/response shapes, the source of truth is the `diamond` repo, not memory — read the controllers and DTOs directly:
 
 ```
-diamond/src/backend/src/modules/{projects,enrollments,rewards,templates,validators,health}/*.controller.ts
+diamond/src/backend/src/modules/{projects,enrollments,rewards,templates,validators,notifications,health}/*.controller.ts
 diamond/src/backend/src/modules/{projects,enrollments,rewards,templates,validators}/dto/*.ts
 diamond/src/backend/src/modules/{projects,enrollments,rewards,templates,validators}/*.schema.ts
 ```
@@ -83,6 +83,6 @@ Don't add per-resource error handling — if the API's error shape changes, fix 
 Create `packages/<language>/` following that language's own idiomatic conventions (this isn't a codegen-from-OpenAPI setup — each SDK is hand-written to match the target language's ergonomics) but keep the cross-cutting decisions consistent with `packages/node`:
 
 - Same auth model: constructor/init takes a Clerk Organization API key, sent as `Authorization: Bearer <key>`.
-- Same resource surface: Projects, Enrollments, Rewards, Templates, Validators, Health — matching whatever `diamond`'s public Swagger doc includes at the time.
+- Same resource surface: Projects, Enrollments, Rewards, Templates, Validators, Notifications, Health — matching whatever `diamond`'s public Swagger doc includes at the time.
 - Same versioning posture: structure for `v1` today, leave an explicit seam for `v2` later.
 - Its own CI workflow and its own publish workflow, targeting that language's package registry, gated behind that package's own test suite the same way `publish.yml` gates on integration tests today.

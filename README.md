@@ -4,7 +4,7 @@
 
 <h1 align="center">Mi Pase SDKs</h1>
 
-<p align="center">Official SDKs for the <a href="https://mi-pase.ar">Mi Pase</a> API — manage projects, enrollments, rewards, pass templates, and validators from your own backend.</p>
+<p align="center">Official SDKs for the <a href="https://mi-pase.ar">Mi Pase</a> API — manage projects, enrollments, rewards, pass templates, validators, and wallet notifications from your own backend.</p>
 
 ## Available SDKs
 
@@ -38,7 +38,7 @@ await client
   .enrollments.create({ domain: "acme", name: "Jane Doe", email: "jane@example.com" });
 ```
 
-See the [Node SDK README](packages/node/README.md) for the full API reference — projects, enrollments, rewards, templates, validators, and error handling.
+See the [Node SDK README](packages/node/README.md) for the full API reference — projects, enrollments, rewards, templates, validators, notifications, and error handling.
 
 ## Support
 

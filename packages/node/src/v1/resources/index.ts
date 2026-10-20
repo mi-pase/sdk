@@ -9,3 +9,4 @@ export * from "./template.resource";
 export * from "./templates.resource";
 export * from "./validator.resource";
 export * from "./validators.resource";
+export * from "./notifications.resource";

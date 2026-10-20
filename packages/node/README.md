@@ -169,6 +169,31 @@ if (isScanAmbiguous(result)) {
 }
 ```
 
+### Notifications
+
+Wallet push notifications to a project's active passes. `send` targets the whole project by default; narrow it with `enrollmentIds` (specific enrollments) and/or an `issuedFrom`/`issuedTo` issued-date window. `message` is shared across both wallets, with optional per-platform overrides — `googleMessage` may carry a single `<a href>` anchor that Google Wallet renders as a tappable link (Apple pushes have no link support).
+
+```ts
+await client.notifications.send({
+  domain,
+  project: projectId,
+  message: "Doors open at 7pm.",
+  // optional per-platform overrides:
+  appleMessage: "Doors open at 7pm.",
+  googleMessage: 'Doors open at 7pm. <a href="https://acme.example/map">View map</a>',
+  // optional filters:
+  enrollmentIds: [enrollmentId1, enrollmentId2],
+  issuedFrom: "2026-10-01",
+  issuedTo: "2026-10-31",
+});
+
+await client.notifications.list({ domain });        // sent-notification history for a domain
+await client.notifications.listByPasses([passId1]); // history touching specific passes
+await client.notifications.preview({ domain, project: projectId, enrollmentIds }); // { count, cooldownUntil }
+```
+
+The API caps sends at **one notification per project per 24h**: a send inside that window throws a `MiPaseApiError` with status `429`. Call `preview` first to get the would-be target `count` and the `cooldownUntil` timestamp (ISO string, or `null` when a send is allowed now) without consuming the cooldown.
+
 ### Health
 
 ```ts

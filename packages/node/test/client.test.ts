@@ -61,6 +61,21 @@ describe("MiPaseClient", () => {
 		expect(calls[0]!.body).toMatchObject({ project_id: "proj_1" });
 	});
 
+	it("exposes client.notifications.send at the top-level /api/notifications URL", async () => {
+		const { client, calls } = testClient([
+			{ status: 201, body: { _id: "ntf_1", status: "sent" } },
+		]);
+
+		await client.notifications.send({
+			domain: "acme",
+			project: "proj_1",
+			message: "Doors open at 7pm",
+		});
+
+		expect(calls[0]!.url).toBe("https://app.mi-pase.ar/api/notifications");
+		expect(calls[0]!.method).toBe("POST");
+	});
+
 	it("defaults to the production base URL", async () => {
 		const { client, calls } = testClient([{ status: 200, body: [] }]);
 		await client.projects.list();

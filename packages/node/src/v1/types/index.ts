@@ -5,4 +5,5 @@ export * from "./enrollment";
 export * from "./reward";
 export * from "./template";
 export * from "./validator";
+export * from "./notification";
 export * from "./health";

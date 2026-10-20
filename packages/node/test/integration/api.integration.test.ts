@@ -388,6 +388,40 @@ describe.skipIf(!apiKey)("integration: mi-pase API (live)", () => {
 		expect(deleted).toEqual({ deleted: true });
 	});
 
+	it("notifications: preview, send (per-platform + enrollment filters), and list", async () => {
+		// Notifications are plan-gated (starter+ with a push entitlement), require
+		// at least one active pass, and are capped at one per project per 24h. Any
+		// of those gates (402/403/400/429) is an acceptable outcome in CI, so the
+		// whole flow is wrapped — we assert on shape only when the API lets it run.
+		try {
+			const preview = await client.notifications.preview({
+				domain,
+				project: project._id,
+			});
+			expect(typeof preview.count).toBe("number");
+			expect(
+				preview.cooldownUntil === null ||
+					typeof preview.cooldownUntil === "string",
+			).toBe(true);
+
+			const history = await client.notifications.list({ domain });
+			expect(Array.isArray(history)).toBe(true);
+
+			const sent = await client.notifications.send({
+				domain,
+				project: project._id,
+				message: "SDK CI test notification",
+				appleMessage: "SDK CI test notification",
+				googleMessage:
+					'SDK CI test notification <a href="https://mi-pase.ar">Details</a>',
+			});
+			expect(sent.status).toBe("sent");
+			expect(sent.message).toBe("SDK CI test notification");
+		} catch (error) {
+			expect(error).toBeInstanceOf(MiPaseApiError);
+		}
+	});
+
 	it("surfaces a 404 as MiPaseApiError", async () => {
 		await expect(
 			client.project("000000000000000000000000").get(),

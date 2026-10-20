@@ -3,6 +3,7 @@ import {
 	EnrollmentResource,
 	EnrollmentsResource,
 	HealthResource,
+	NotificationsResource,
 	ProjectResource,
 	ProjectsResource,
 	TemplateResource,
@@ -12,7 +13,7 @@ import {
 } from "./v1/resources";
 import type { HealthStatus } from "./v1/types";
 
-const PACKAGE_VERSION = "0.1.0";
+const PACKAGE_VERSION = "0.2.0";
 const DEFAULT_BASE_URL = "https://app.mi-pase.ar";
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_RETRIES = 2;
@@ -64,6 +65,7 @@ export class MiPaseClient {
 	readonly enrollments: EnrollmentsResource;
 	readonly templates: TemplatesResource;
 	readonly validators: ValidatorsResource;
+	readonly notifications: NotificationsResource;
 
 	constructor(options: MiPaseClientOptions) {
 		if (!options.apiKey) {
@@ -95,6 +97,7 @@ export class MiPaseClient {
 		this.enrollments = new EnrollmentsResource(this.http);
 		this.templates = new TemplatesResource(this.http);
 		this.validators = new ValidatorsResource(this.http);
+		this.notifications = new NotificationsResource(this.http);
 	}
 
 	/** Address a single project by id. @example client.project(id).get() */
