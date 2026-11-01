@@ -11,6 +11,11 @@ export interface Enrollment extends Timestamps {
 	customFields: Record<string, string | string[]>;
 	integrationInstance?: ObjectId;
 	externalId?: string;
+	/** Public download-page URL for this enrollment's issued pass — open it on a
+	 *  phone to add the pass to Apple/Google Wallet. Present only once a pass has
+	 *  been issued; omitted while issuance is pending/failed or the pass was
+	 *  revoked. Returned on both the get-one and list endpoints. */
+	downloadUrl?: string;
 	deletedAt?: string;
 }
 
