@@ -93,3 +93,19 @@ describe("EnrollmentResource.setCustomFields", () => {
 		});
 	});
 });
+
+describe("EnrollmentResource.revoke", () => {
+	it("POSTs to /api/enrollments/:id/revoke with no body and returns the enrollment", async () => {
+		const { enrollment, calls } = resource([
+			{ status: 200, body: { _id: "enr_1" } },
+		]);
+
+		const result = await enrollment.revoke();
+
+		expect(calls).toHaveLength(1);
+		expect(calls[0]!.method).toBe("POST");
+		expect(calls[0]!.url).toContain("/api/enrollments/enr_1/revoke");
+		expect(calls[0]!.body).toBeUndefined();
+		expect(result._id).toBe("enr_1");
+	});
+});

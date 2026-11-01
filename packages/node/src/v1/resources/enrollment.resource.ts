@@ -34,6 +34,19 @@ export class EnrollmentResource {
 	}
 
 	/**
+	 * POST /api/enrollments/:id/revoke — revokes this enrollment's issued pass
+	 * while keeping the person enrolled (unlike `delete`, which unenrolls them).
+	 * Idempotent: a no-op if there is no issued pass. The pass can be re-issued
+	 * later, and the returned enrollment reflects the revoked state (its
+	 * `downloadUrl` is gone and `passState` is `revoked`).
+	 */
+	revoke(): Promise<Enrollment> {
+		return this.http.post<Enrollment>(
+			`/api/enrollments/${this.id}/revoke`,
+		);
+	}
+
+	/**
 	 * Set one or more custom field values.
 	 *
 	 * A value is a string for `text`/`date` fields, or a `string[]` for `list`

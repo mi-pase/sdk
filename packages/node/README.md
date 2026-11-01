@@ -103,7 +103,8 @@ await client.enrollments.copyToProject({ sourceProjectId, targetProjectId, domai
 
 await client.enrollment(id).get();
 await client.enrollment(id).update({ customFields });  // full replace, matches the raw API
-await client.enrollment(id).delete();
+await client.enrollment(id).delete();                  // unenrolls the person (and revokes their pass)
+await client.enrollment(id).revoke();                  // revokes the issued pass; person stays enrolled
 await client.enrollment(id).setCustomFields({ seat: "12A" });                     // merges with existing fields (fetches first)
 await client.enrollment(id).setCustomFields({ seat: "12A" }, { override: true }); // full replace, no extra fetch
 ```
