@@ -65,6 +65,11 @@ describe.skipIf(!apiKey)("integration: mi-pase API (live)", () => {
 	const client = new MiPaseClient({
 		apiKey: apiKey ?? "unused-because-suite-is-skipped",
 		baseUrl,
+		// The default 30s per-request timeout is too tight for the setup calls:
+		// creating a template provisions the domain's Google child issuer and
+		// syncs to the templates/passes microservices, which can exceed 30s cold.
+		// Kept under the 120s hook/test timeouts in vitest.integration.config.ts.
+		timeoutMs: 90_000,
 	});
 
 	const cleanup: { projectIds: string[]; templateIds: string[] } = {
