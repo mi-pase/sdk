@@ -1,5 +1,30 @@
 import type { ObjectId, Timestamps } from "./common";
 
+/** Download activity for one wallet platform, summarized from the enrollment's
+ *  issued pass. */
+export interface PlatformDownloadSummary {
+	/** Number of times the pass was served/downloaded for this platform. */
+	count: number;
+	/** ISO timestamp of the most recent download for this platform, or `null`
+	 *  if it has never been downloaded. */
+	lastAt: string | null;
+}
+
+/** Compact summary of how often an enrollment's pass has been downloaded,
+ *  across both wallet platforms. Always present on enrollment responses — all
+ *  counts are `0` and timestamps `null` when the pass has never been
+ *  downloaded (or has not been issued yet). This reflects *downloads* (the
+ *  pass file/save URL being served), not confirmed wallet installations. */
+export interface PassDownloadSummary {
+	/** Total downloads across both platforms (`apple.count + google.count`). */
+	total: number;
+	/** ISO timestamp of the most recent download across either platform, or
+	 *  `null` if never downloaded. */
+	lastDownloadedAt: string | null;
+	apple: PlatformDownloadSummary;
+	google: PlatformDownloadSummary;
+}
+
 export interface Enrollment extends Timestamps {
 	_id: ObjectId;
 	domain: string;
@@ -16,6 +41,9 @@ export interface Enrollment extends Timestamps {
 	 *  been issued; omitted while issuance is pending/failed or the pass was
 	 *  revoked. Returned on both the get-one and list endpoints. */
 	downloadUrl?: string;
+	/** Per-platform download summary for the issued pass. See
+	 *  {@link PassDownloadSummary}. */
+	downloads: PassDownloadSummary;
 	deletedAt?: string;
 }
 

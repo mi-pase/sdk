@@ -118,6 +118,21 @@ await client.project(projectId).enrollments.bulkCreate({ domain, rows: [...] });
 await client.project(projectId).enrollment(enrollmentId).setCustomFields({...});
 ```
 
+Every returned `Enrollment` carries a `downloads` summary for its issued pass —
+per-platform download counts and the last download time — plus a `downloadUrl`
+link. Use it to see how often a recipient has fetched their pass without a
+second request (this counts *downloads*, i.e. the pass being served, not
+confirmed wallet installations):
+
+```ts
+const enrollment = await client.enrollment(id).get();
+enrollment.downloadUrl;                 // public link to the issued pass, if any
+enrollment.downloads.total;             // downloads across both platforms
+enrollment.downloads.lastDownloadedAt;  // ISO timestamp, or null if never
+enrollment.downloads.apple.count;       // e.g. 3
+enrollment.downloads.google.lastAt;     // ISO timestamp, or null
+```
+
 ### Rewards
 
 Rewards only exist within a project — there's no top-level `/rewards` endpoint.
